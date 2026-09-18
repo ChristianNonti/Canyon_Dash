@@ -1,3 +1,10 @@
+/* ============================================================
+   Canyon Dash — Stylesheet
+   Semua styling game (dulunya inline di index.html) dipindah
+   ke sini supaya lebih mudah dirawat & diubah terpisah dari HTML.
+   ============================================================ */
+
+/* ---------- Page background (area di luar canvas game) ---------- */
 html, body {
   background-color: #0d0616;
 }
@@ -56,12 +63,12 @@ body::after {
   --ok:#7fe08a;
 }
 *{box-sizing:border-box}
-html,body{margin:0;height:100%;height:100dvh;background:#0d0616;overflow:hidden;
+html,body{margin:0;height:100%;height:100dvh;height:100svh;background:#0d0616;overflow:hidden;
   font-family:'Silkscreen',monospace;color:var(--cream);
   -webkit-tap-highlight-color:transparent; user-select:none;
 }
 body{
-  display:flex;justify-content:center;align-items:center;min-height:100%;min-height:100dvh;
+  display:flex;justify-content:center;align-items:center;min-height:100%;min-height:100dvh;min-height:100svh;
   /* background dipindah ke styles.css supaya lebih mudah diubah/dipercantik terpisah */
 }
 #stage{position:relative;z-index:1; /* di atas vignette body::after */
@@ -73,7 +80,9 @@ body{
 @media (max-width:900px){
   #stage{
     width:100vw; width:100dvw;
-    height:100dvh; height:100vh;
+    /* svh = "small viewport height", tetap muat walau address bar browser
+       sedang tampil, jadi HUD atas & tombol bawah tidak kepotong */
+    height:100vh; height:calc(100svh - 6px);
     max-width:none; aspect-ratio:unset;
   }
   canvas{border-radius:0; box-shadow:none;}
