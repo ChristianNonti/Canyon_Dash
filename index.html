@@ -2,95 +2,11 @@
 <html lang="id">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <title>Canyon Dash</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Silkscreen:wght@400;700&display=swap" rel="stylesheet">
-<style>
-:root{
-  --ink:#1c1030;
-  --panel:#241436;
-  --panel-edge:#4a2f63;
-  --gold:#f0b23d;
-  --gold-dim:#a67a28;
-  --cream:#f6ead1;
-  --gem:#4be8d6;
-  --danger:#e2596b;
-  --ok:#7fe08a;
-}
-*{box-sizing:border-box}
-html,body{margin:0;height:100%;height:100dvh;background:#0d0616;overflow:hidden;
-  font-family:'Silkscreen',monospace;color:var(--cream);
-  -webkit-tap-highlight-color:transparent; user-select:none;
-}
-body{
-  display:flex;justify-content:center;align-items:center;min-height:100%;min-height:100dvh;
-  background:
-    radial-gradient(ellipse at 50% 0%, #3a1f52 0%, #0d0616 65%);
-}
-#stage{position:relative;
-  width:min(1040px, 100vw, calc(100vh * 960 / 540));
-  width:min(1040px, 100vw, calc(100dvh * 960 / 540));
-  aspect-ratio:960/540;
-}
-canvas{width:100%;height:100%;display:block;image-rendering:pixelated;border-radius:6px;
-  box-shadow:0 0 0 3px var(--panel-edge), 0 0 0 6px var(--ink), 0 30px 60px -15px #000c;
-}
-
-#hud{position:absolute;top:0;left:0;right:0;display:flex;justify-content:space-between;
-  padding:10px 12px;pointer-events:none;z-index:3;}
-.pill{background:#160b22cc;border:2px solid var(--panel-edge);border-radius:8px;
-  padding:6px 10px;font-size:13px;display:flex;gap:8px;align-items:center;letter-spacing:1px;}
-#hudRight{display:flex;align-items:center;gap:8px;}
-#musicBtn{pointer-events:auto;background:#160b22cc;border:2px solid var(--panel-edge);color:var(--cream);
-  border-radius:8px;padding:6px 10px;font-family:'Silkscreen',monospace;font-size:13px;cursor:pointer;
-  line-height:1;height:fit-content;}
-#musicBtn:hover{border-color:var(--gold)}
-#hearts span{filter:drop-shadow(1px 1px 0 #000)}
-#timer{font-size:12px;color:#c9b8e0;margin-left:10px}
-#gemCount{color:var(--gem)}
-#stageLabel{position:absolute;top:46px;left:50%;transform:translateX(-50%);
-  pointer-events:none;font-size:10px;color:#c9b8e0;background:#160b22cc;
-  border:2px solid var(--panel-edge);border-radius:7px;padding:4px 9px;letter-spacing:1px;z-index:3;}
-
-#msg{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);
-  font-size:10px;color:#c9b8e0cc;letter-spacing:.5px;pointer-events:none;text-align:center;width:100%;z-index:3;}
-
-#pauseBtn{position:absolute;top:10px;left:50%;transform:translateX(-50%);
-  pointer-events:auto;background:#160b22cc;border:2px solid var(--panel-edge);color:var(--cream);
-  border-radius:8px;padding:6px 10px;font-family:'Silkscreen',monospace;font-size:13px;cursor:pointer;z-index:3;}
-#pauseBtn:hover{border-color:var(--gold)}
-
-.overlay{position:absolute;inset:0;background:linear-gradient(180deg,#0d0616ee,#1c1030ee);
-  display:flex;align-items:center;justify-content:center;text-align:center;z-index:5}
-.card{background:var(--panel);border:3px solid var(--panel-edge);border-radius:10px;
-  padding:30px 34px;box-shadow:0 0 0 3px var(--ink), 0 20px 50px #000a;max-width:86%;}
-.card h1{font-family:'Press Start 2P',monospace;font-size:20px;margin:0 0 14px;color:var(--gold);
-  text-shadow:3px 3px 0 var(--ink);line-height:1.5;}
-.card p{margin:6px 0;font-size:13px;color:#d9c9ec;line-height:1.7}
-.stars{font-size:26px;margin:10px 0;letter-spacing:6px}
-.hint{font-size:10px;color:#9a86b8;margin-top:14px;line-height:1.8}
-button.play{font-family:'Press Start 2P',monospace;font-size:13px;letter-spacing:1px;
-  padding:14px 22px;border:0;border-radius:8px;background:var(--gold);color:#241436;
-  cursor:pointer;box-shadow:0 5px 0 var(--gold-dim), 0 8px 16px #0006;margin-top:14px;
-  transition:transform .08s;}
-button.play:active{transform:translateY(4px);box-shadow:0 1px 0 var(--gold-dim);}
-
-#touch{position:absolute;inset:0;display:none;pointer-events:none;z-index:1}
-#touch.on{display:block}
-.tbtn{position:absolute;pointer-events:auto;background:#160b2299;border:2px solid var(--panel-edge);
-  border-radius:14px;display:flex;align-items:center;justify-content:center;color:#f6ead1cc;
-  font-size:22px;-webkit-user-select:none}
-#tLeft{left:14px;bottom:14px;width:48px;height:48px}
-#tRight{left:68px;bottom:14px;width:48px;height:48px}
-#tJump{right:14px;bottom:14px;width:60px;height:60px;border-radius:50%;font-size:20px}
-.tbtn.active{background:#f0b23d55;border-color:var(--gold)}
-@media (max-width:520px){
-  #tLeft{width:42px;height:42px;font-size:18px}
-  #tRight{width:42px;height:42px;left:60px;font-size:18px}
-  #tJump{width:52px;height:52px;font-size:17px}
-}
-</style>
+<link rel="stylesheet" href="styles.css">
 </head>
 <body>
 <div id="stage">
@@ -106,6 +22,8 @@ button.play:active{transform:translateY(4px);box-shadow:0 1px 0 var(--gold-dim);
   <button id="pauseBtn">⏸</button>
   <div id="stageLabel">STAGE 1/5</div>
   <div id="msg">A/D atau ←/→ gerak • SPACE/W/↑ lompat (bisa 2×!) • P jeda</div>
+
+  <div id="djGauge"><div id="djFill"></div></div>
 
   <div id="touch">
     <div class="tbtn" id="tLeft">◀</div>
@@ -133,6 +51,8 @@ const pauseBtn=document.getElementById("pauseBtn");
 const musicBtn=document.getElementById("musicBtn");
 const touchWrap=document.getElementById("touch");
 const stageLabelEl=document.getElementById("stageLabel");
+const djGaugeEl=document.getElementById("djGauge");
+const djFillEl=document.getElementById("djFill");
 
 let state="menu"; // menu | playing | paused | dead | won | stagecomplete
 let jumpKeyPrev=false; // for edge-detecting a fresh jump press (so holding the key doesn't auto-chain into double jump)
@@ -2448,22 +2368,22 @@ function drawPlayer(){
   ctx.restore();
 }
 
-function drawJumpGauge(){
-  const barW=26, barH=5;
-  const cx=p.x+p.w/2-barW/2, cy=p.y-16;
+function updateJumpGauge(){
   const pct=Math.min(1,p.dj/DJ_RECHARGE);
-  ctx.fillStyle="#160b22cc";
-  ctx.fillRect(cx-1,cy-1,barW+2,barH+2);
-  ctx.strokeStyle="#4a2f63";ctx.lineWidth=1;
-  ctx.strokeRect(cx-1,cy-1,barW+2,barH+2);
-  ctx.fillStyle=pct>=1?"#4be8d6":"#f0b23d";
-  ctx.fillRect(cx,cy,barW*pct,barH);
-  if(pct>=1){ // little glow pulse when ready
-    ctx.globalAlpha=0.5+Math.sin(bgTime*0.008)*0.3;
-    ctx.fillStyle="#cdfff8";
-    ctx.fillRect(cx,cy,barW,barH);
-    ctx.globalAlpha=1;
-  }
+  const ready=pct>=1;
+  // account for object-fit:cover cropping/scaling on mobile so the gauge still
+  // lines up with the player even when the canvas is cropped to fill the screen
+  const rect=canvas.getBoundingClientRect();
+  const scale=Math.max(rect.width/W, rect.height/H);
+  const offX=(W*scale-rect.width)/2;
+  const offY=(H*scale-rect.height)/2;
+  const screenX=(p.x+p.w/2-camera)*scale-offX;
+  const screenY=(p.y-16)*scale-offY;
+  djGaugeEl.style.left=screenX+"px";
+  djGaugeEl.style.top=screenY+"px";
+  djGaugeEl.classList.toggle("show", state==="playing"||state==="paused");
+  djFillEl.style.width=(pct*100)+"%";
+  djFillEl.classList.toggle("ready", ready);
 }
 
 function drawParticles(){
@@ -2494,7 +2414,7 @@ function draw(){
   for(const e of enemies)drawEnemy(e);
   for(const s of saws)drawSaw(s);
   drawPlayer();
-  drawJumpGauge();
+  updateJumpGauge();
   drawParticles();
 
   ctx.restore();
