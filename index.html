@@ -41,6 +41,11 @@ canvas{width:100%;height:100%;display:block;image-rendering:pixelated;border-rad
   padding:10px 12px;pointer-events:none;z-index:3;}
 .pill{background:#160b22cc;border:2px solid var(--panel-edge);border-radius:8px;
   padding:6px 10px;font-size:13px;display:flex;gap:8px;align-items:center;letter-spacing:1px;}
+#hudRight{display:flex;align-items:center;gap:8px;}
+#musicBtn{pointer-events:auto;background:#160b22cc;border:2px solid var(--panel-edge);color:var(--cream);
+  border-radius:8px;padding:6px 10px;font-family:'Silkscreen',monospace;font-size:13px;cursor:pointer;
+  line-height:1;height:fit-content;}
+#musicBtn:hover{border-color:var(--gold)}
 #hearts span{filter:drop-shadow(1px 1px 0 #000)}
 #timer{font-size:12px;color:#c9b8e0;margin-left:10px}
 #gemCount{color:var(--gem)}
@@ -76,10 +81,15 @@ button.play:active{transform:translateY(4px);box-shadow:0 1px 0 var(--gold-dim);
 .tbtn{position:absolute;pointer-events:auto;background:#160b2299;border:2px solid var(--panel-edge);
   border-radius:14px;display:flex;align-items:center;justify-content:center;color:#f6ead1cc;
   font-size:22px;-webkit-user-select:none}
-#tLeft{left:16px;bottom:18px;width:64px;height:64px}
-#tRight{left:88px;bottom:18px;width:64px;height:64px}
-#tJump{right:16px;bottom:18px;width:80px;height:80px;border-radius:50%;font-size:26px}
+#tLeft{left:14px;bottom:14px;width:48px;height:48px}
+#tRight{left:68px;bottom:14px;width:48px;height:48px}
+#tJump{right:14px;bottom:14px;width:60px;height:60px;border-radius:50%;font-size:20px}
 .tbtn.active{background:#f0b23d55;border-color:var(--gold)}
+@media (max-width:520px){
+  #tLeft{width:42px;height:42px;font-size:18px}
+  #tRight{width:42px;height:42px;left:60px;font-size:18px}
+  #tJump{width:52px;height:52px;font-size:17px}
+}
 </style>
 </head>
 <body>
@@ -88,10 +98,12 @@ button.play:active{transform:translateY(4px);box-shadow:0 1px 0 var(--gold-dim);
 
   <div id="hud">
     <div class="pill" id="hearts">❤️❤️❤️</div>
-    <div class="pill"><span>💎</span><span id="gemCount">0</span><span id="timer">0:00</span></div>
+    <div id="hudRight">
+      <div class="pill"><span>💎</span><span id="gemCount">0</span><span id="timer">0:00</span></div>
+      <button id="musicBtn">🎵</button>
+    </div>
   </div>
   <button id="pauseBtn">⏸</button>
-  <button id="musicBtn" style="position:absolute;top:10px;right:12px;pointer-events:auto;background:#160b22cc;border:2px solid var(--panel-edge);color:var(--cream);border-radius:8px;padding:6px 10px;font-family:'Silkscreen',monospace;font-size:13px;cursor:pointer;z-index:3;">🎵</button>
   <div id="stageLabel">STAGE 1/5</div>
   <div id="msg">A/D atau ←/→ gerak • SPACE/W/↑ lompat (bisa 2×!) • P jeda</div>
 
@@ -123,8 +135,10 @@ const touchWrap=document.getElementById("touch");
 const stageLabelEl=document.getElementById("stageLabel");
 
 let state="menu"; // menu | playing | paused | dead | won | stagecomplete
+let jumpKeyPrev=false; // for edge-detecting a fresh jump press (so holding the key doesn't auto-chain into double jump)
 let overlayAction="start"; // start | resume | nextstage | restart
 const START_LIVES=5, MAX_LIVES=5;
+const DJ_RECHARGE=3000; // ms for double jump to auto-recharge
 let score=0,lives=START_LIVES,camera=0,last=0,elapsed=0;
 let stage=1; // 1-based current stage index
 const keys={};
@@ -1954,7 +1968,8 @@ function loadStage(n){
 
   p={x:activeCP.x,y:activeCP.y,w:26,h:38,vx:0,vy:0,ground:false,inv:0,
      maxSpeed:5.2,dashTimer:0,
-     jumps:0,maxJumps:2,coyote:0,jumpBuf:0,facing:1,squash:1,anim:0,running:false,dust:0};
+     jumps:0,maxJumps:2,coyote:0,jumpBuf:0,facing:1,squash:1,anim:0,running:false,dust:0,
+     dj:DJ_RECHARGE,djReady:true};
   camera=0;
   hud();
 }
@@ -1975,7 +1990,7 @@ function goNextStage(){
 }
 
 function respawn(){
-  p.x=activeCP.x;p.y=activeCP.y;p.vx=0;p.vy=0;p.inv=110;p.jumps=0;
+  p.x=activeCP.x;p.y=activeCP.y;p.vx=0;p.vy=0;p.inv=110;p.jumps=0;p.dj=DJ_RECHARGE;
   camera=Math.max(0,Math.min(world-W,p.x-300));
 }
 
@@ -2064,11 +2079,15 @@ function update(dt){
   p.vx=Math.max(-p.maxSpeed,Math.min(p.maxSpeed,p.vx));
 
   if(p.ground)p.coyote=8; else p.coyote=Math.max(0,p.coyote-1);
-  if(J)p.jumpBuf=8; else p.jumpBuf=Math.max(0,p.jumpBuf-1);
+  if(J && !jumpKeyPrev)p.jumpBuf=8; else p.jumpBuf=Math.max(0,p.jumpBuf-1);
+  jumpKeyPrev=J;
 
-  if(p.jumpBuf>0 && (p.coyote>0 || p.jumps<p.maxJumps)){
+  p.dj=Math.min(DJ_RECHARGE,p.dj+dt); // double jump auto-recharges over time
+  p.djReady=p.dj>=DJ_RECHARGE;
+
+  if(p.jumpBuf>0 && (p.coyote>0 || (p.jumps>=1 && p.jumps<p.maxJumps && p.djReady))){
     if(p.coyote>0){ p.vy=-12.5; p.jumps=1; snd.jump(); }
-    else if(p.jumps<p.maxJumps){ p.vy=-11; p.jumps++; snd.doubleJump();
+    else if(p.jumps>=1 && p.jumps<p.maxJumps && p.djReady){ p.vy=-11; p.jumps++; p.dj=0; p.djReady=false; snd.doubleJump();
       p.maxSpeed=8.4; p.dashTimer=26; // 2nd jump gets a speed burst so it covers real distance
       p.vx=Math.max(-p.maxSpeed,Math.min(p.maxSpeed,p.vx+p.facing*2.6));
       spawnParticles(p.x+p.w/2,p.y+p.h,6,["#4be8d6","#cdfff8"],2,18,2);
@@ -2429,6 +2448,24 @@ function drawPlayer(){
   ctx.restore();
 }
 
+function drawJumpGauge(){
+  const barW=26, barH=5;
+  const cx=p.x+p.w/2-barW/2, cy=p.y-16;
+  const pct=Math.min(1,p.dj/DJ_RECHARGE);
+  ctx.fillStyle="#160b22cc";
+  ctx.fillRect(cx-1,cy-1,barW+2,barH+2);
+  ctx.strokeStyle="#4a2f63";ctx.lineWidth=1;
+  ctx.strokeRect(cx-1,cy-1,barW+2,barH+2);
+  ctx.fillStyle=pct>=1?"#4be8d6":"#f0b23d";
+  ctx.fillRect(cx,cy,barW*pct,barH);
+  if(pct>=1){ // little glow pulse when ready
+    ctx.globalAlpha=0.5+Math.sin(bgTime*0.008)*0.3;
+    ctx.fillStyle="#cdfff8";
+    ctx.fillRect(cx,cy,barW,barH);
+    ctx.globalAlpha=1;
+  }
+}
+
 function drawParticles(){
   for(const pt of particles){
     ctx.globalAlpha=Math.max(0,pt.life/pt.maxLife);
@@ -2457,6 +2494,7 @@ function draw(){
   for(const e of enemies)drawEnemy(e);
   for(const s of saws)drawSaw(s);
   drawPlayer();
+  drawJumpGauge();
   drawParticles();
 
   ctx.restore();
