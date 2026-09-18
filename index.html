@@ -19,22 +19,26 @@
   --ok:#7fe08a;
 }
 *{box-sizing:border-box}
-html,body{margin:0;height:100%;background:#0d0616;overflow:hidden;
+html,body{margin:0;height:100%;height:100dvh;background:#0d0616;overflow:hidden;
   font-family:'Silkscreen',monospace;color:var(--cream);
   -webkit-tap-highlight-color:transparent; user-select:none;
 }
 body{
-  display:flex;justify-content:center;align-items:center;min-height:100%;
+  display:flex;justify-content:center;align-items:center;min-height:100%;min-height:100dvh;
   background:
     radial-gradient(ellipse at 50% 0%, #3a1f52 0%, #0d0616 65%);
 }
-#stage{position:relative;width:min(1040px,100vw);aspect-ratio:960/540;max-height:100vh;}
+#stage{position:relative;
+  width:min(1040px, 100vw, calc(100vh * 960 / 540));
+  width:min(1040px, 100vw, calc(100dvh * 960 / 540));
+  aspect-ratio:960/540;
+}
 canvas{width:100%;height:100%;display:block;image-rendering:pixelated;border-radius:6px;
   box-shadow:0 0 0 3px var(--panel-edge), 0 0 0 6px var(--ink), 0 30px 60px -15px #000c;
 }
 
 #hud{position:absolute;top:0;left:0;right:0;display:flex;justify-content:space-between;
-  padding:10px 12px;pointer-events:none;}
+  padding:10px 12px;pointer-events:none;z-index:3;}
 .pill{background:#160b22cc;border:2px solid var(--panel-edge);border-radius:8px;
   padding:6px 10px;font-size:13px;display:flex;gap:8px;align-items:center;letter-spacing:1px;}
 #hearts span{filter:drop-shadow(1px 1px 0 #000)}
@@ -42,14 +46,14 @@ canvas{width:100%;height:100%;display:block;image-rendering:pixelated;border-rad
 #gemCount{color:var(--gem)}
 #stageLabel{position:absolute;top:46px;left:50%;transform:translateX(-50%);
   pointer-events:none;font-size:10px;color:#c9b8e0;background:#160b22cc;
-  border:2px solid var(--panel-edge);border-radius:7px;padding:4px 9px;letter-spacing:1px;}
+  border:2px solid var(--panel-edge);border-radius:7px;padding:4px 9px;letter-spacing:1px;z-index:3;}
 
 #msg{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);
-  font-size:10px;color:#c9b8e0cc;letter-spacing:.5px;pointer-events:none;text-align:center;width:100%}
+  font-size:10px;color:#c9b8e0cc;letter-spacing:.5px;pointer-events:none;text-align:center;width:100%;z-index:3;}
 
 #pauseBtn{position:absolute;top:10px;left:50%;transform:translateX(-50%);
   pointer-events:auto;background:#160b22cc;border:2px solid var(--panel-edge);color:var(--cream);
-  border-radius:8px;padding:6px 10px;font-family:'Silkscreen',monospace;font-size:13px;cursor:pointer;}
+  border-radius:8px;padding:6px 10px;font-family:'Silkscreen',monospace;font-size:13px;cursor:pointer;z-index:3;}
 #pauseBtn:hover{border-color:var(--gold)}
 
 .overlay{position:absolute;inset:0;background:linear-gradient(180deg,#0d0616ee,#1c1030ee);
@@ -67,7 +71,7 @@ button.play{font-family:'Press Start 2P',monospace;font-size:13px;letter-spacing
   transition:transform .08s;}
 button.play:active{transform:translateY(4px);box-shadow:0 1px 0 var(--gold-dim);}
 
-#touch{position:absolute;inset:0;display:none;pointer-events:none;z-index:4}
+#touch{position:absolute;inset:0;display:none;pointer-events:none;z-index:1}
 #touch.on{display:block}
 .tbtn{position:absolute;pointer-events:auto;background:#160b2299;border:2px solid var(--panel-edge);
   border-radius:14px;display:flex;align-items:center;justify-content:center;color:#f6ead1cc;
@@ -87,8 +91,8 @@ button.play:active{transform:translateY(4px);box-shadow:0 1px 0 var(--gold-dim);
     <div class="pill"><span>💎</span><span id="gemCount">0</span><span id="timer">0:00</span></div>
   </div>
   <button id="pauseBtn">⏸</button>
-  <button id="musicBtn" style="position:absolute;top:10px;right:12px;pointer-events:auto;background:#160b22cc;border:2px solid var(--panel-edge);color:var(--cream);border-radius:8px;padding:6px 10px;font-family:'Silkscreen',monospace;font-size:13px;cursor:pointer;">🎵</button>
-  <div id="stageLabel">STAGE 1/3</div>
+  <button id="musicBtn" style="position:absolute;top:10px;right:12px;pointer-events:auto;background:#160b22cc;border:2px solid var(--panel-edge);color:var(--cream);border-radius:8px;padding:6px 10px;font-family:'Silkscreen',monospace;font-size:13px;cursor:pointer;z-index:3;">🎵</button>
+  <div id="stageLabel">STAGE 1/5</div>
   <div id="msg">A/D atau ←/→ gerak • SPACE/W/↑ lompat (bisa 2×!) • P jeda</div>
 
   <div id="touch">
@@ -181,12 +185,18 @@ const MUSIC=[ // one track per stage: 0 = frequency means "rest"
   { step:0.24, leadType:"square", bassType:"triangle", leadGain:0.05, bassGain:0.055,
     lead:[523,0,659,784,0,659,587,0,698,880,0,698,523,0,659,784,988,0,880,784,659,0,587,0],
     bass:[131,131,147,147,165,165,131,131] },
-  { step:0.24, leadType:"triangle", bassType:"sine", leadGain:0.055, bassGain:0.065,
-    lead:[523,587,659,784,659,587,523,0,659,784,880,1046,880,784,659,0,587,659,784,880,784,659,587,0],
-    bass:[131,131,165,165,147,147,196,196] },
-  { step:0.20, leadType:"square", bassType:"triangle", leadGain:0.045, bassGain:0.06,
-    lead:[330,0,392,440,494,440,392,330,262,0,330,392,440,392,330,294,330,392,440,494,523,494,440,392],
-    bass:[82,82,98,98,110,110,123,123] }
+  { step:0.30, leadType:"triangle", bassType:"sine", leadGain:0.05, bassGain:0.06,
+    lead:[392,0,466,587,0,466,349,0,415,523,0,415,392,0,466,587,698,0,622,587,466,0,415,0],
+    bass:[98,98,110,110,123,123,98,98] },
+  { step:0.22, leadType:"sawtooth", bassType:"square", leadGain:0.035, bassGain:0.05,
+    lead:[220,0,262,311,0,262,233,0,277,349,0,277,220,0,262,311,349,0,311,277,233,0,208,0],
+    bass:[55,55,62,62,73,73,55,55] },
+  { step:0.34, leadType:"sine", bassType:"triangle", leadGain:0.045, bassGain:0.05,
+    lead:[659,0,0,784,0,587,0,0,698,0,880,0,0,659,0,523,0,0,659,784,0,0,587,0],
+    bass:[65,65,73,73,82,82,65,65] },
+  { step:0.20, leadType:"square", bassType:"sawtooth", leadGain:0.04, bassGain:0.05,
+    lead:[392,494,587,494,440,554,659,554,392,494,587,698,659,554,494,440,392,494,587,784,698,587,494,392],
+    bass:[98,98,110,110,131,131,147,147] }
 ];
 function ensureAudioCtx(){
   if(!actx)actx=new (window.AudioContext||window.webkitAudioContext)();
@@ -214,14 +224,6 @@ function musicScheduler(){
       if(i%3===0){
         const bi=(i/3|0)%track.bass.length;
         playMusicNote(track.bass[bi],track.step*2.6,track.bassType,track.bassGain,musicNextTime);
-      }
-      // Extra soft harmony/pulse on stages 2 & 3 for a fuller soundtrack.
-      if(stage>=2 && i%4===2){
-        const harmony = track.lead[i] ? track.lead[i]*0.5 : 0;
-        playMusicNote(harmony,track.step*0.7,"sine",track.leadGain*0.32,musicNextTime);
-      }
-      if(stage===3 && i%6===0){
-        playMusicNote(55,track.step*0.35,"sine",0.025,musicNextTime);
       }
       musicNextTime+=track.step;
       musicStepIndex++;
@@ -253,199 +255,1664 @@ musicBtn.onclick=()=>{
    gap, never on a moving platform that might not be there yet.
 */
 const LEVELS=[
-  { // ---- STAGE 1: Canyon Dash ----
-    name:"Canyon Dash",
-    world:3200,
-    theme:{
-      sky:["#3a1f66","#7a3b6b","#d9784f","#f3ae5e"],
-      orb:"sun", orbPos:[760,120],
-      farMt:"#4a2b57", nearMt:"#7a3d42", nearMtBase:"#5c2d34",
-      decor:"cactus", decorColor:"#3d5c3f", tuftColor:"#6fae5c",
-      ambient:"#ffd98a"
+  {
+    "name": "Canyon Dash",
+    "world": 4716,
+    "theme": {
+      "sky": [
+        "#3a1f66",
+        "#7a3b6b",
+        "#d9784f",
+        "#f3ae5e"
+      ],
+      "orb": "sun",
+      "orbPos": [
+        760,
+        120
+      ],
+      "farMt": "#4a2b57",
+      "nearMt": "#7a3d42",
+      "nearMtBase": "#5c2d34",
+      "decor": "cactus",
+      "decorColor": "#3d5c3f",
+      "tuftColor": "#6fae5c",
+      "ambient": "#ffd98a"
     },
-    platforms:[
-      {x:0,y:470,w:360,h:70},                                                   //0 start ground
-      {x:450,y:400,w:170,h:22},                                                 //1
-      {x:690,y:330,w:160,h:22},                                                 //2
-      {x:930,y:410,w:190,h:22},                                                 //3
-      {x:1190,y:340,w:170,h:22},                                                //4
-      {x:1440,y:420,w:210,h:22},                                                //5
-      {x:1740,y:350,w:160,h:22},                                                //6
-      {x:1980,y:250,w:130,h:20, moving:true, ax:1980, bx:2160, sp:0.9, dir:1},   //7 moving (horizontal)
-      {x:2260,y:430,w:200,h:22},                                                //8
-      {x:2550,y:380,w:150,h:20, moving:true, ay:380, by:280, sp:0.7, dir:1, vertical:true}, //9 moving (vertical, shorter travel so it's always reachable)
-      {x:2800,y:440,w:200,h:22},                                                //10
-      {x:3040,y:360,w:200,h:200}                                                //11 final block (portal stands here)
+    "platforms": [
+      {
+        "x": 0,
+        "y": 470,
+        "w": 300,
+        "h": 70
+      },
+      {
+        "x": 382,
+        "y": 380,
+        "w": 160,
+        "h": 20
+      },
+      {
+        "x": 624,
+        "y": 345,
+        "w": 160,
+        "h": 20
+      },
+      {
+        "x": 866,
+        "y": 380,
+        "w": 160,
+        "h": 20
+      },
+      {
+        "x": 1108,
+        "y": 415,
+        "w": 130,
+        "h": 20,
+        "moving": true,
+        "ax": 1108,
+        "bx": 1278,
+        "sp": 0.9,
+        "dir": 1
+      },
+      {
+        "x": 1320,
+        "y": 380,
+        "w": 160,
+        "h": 20
+      },
+      {
+        "x": 1562,
+        "y": 345,
+        "w": 160,
+        "h": 20
+      },
+      {
+        "x": 1804,
+        "y": 380,
+        "w": 160,
+        "h": 20
+      },
+      {
+        "x": 2046,
+        "y": 415,
+        "w": 130,
+        "h": 20,
+        "moving": true,
+        "ax": 2046,
+        "bx": 2216,
+        "sp": 0.9,
+        "dir": 1
+      },
+      {
+        "x": 2258,
+        "y": 380,
+        "w": 160,
+        "h": 20
+      },
+      {
+        "x": 2500,
+        "y": 345,
+        "w": 160,
+        "h": 20
+      },
+      {
+        "x": 2742,
+        "y": 380,
+        "w": 160,
+        "h": 20
+      },
+      {
+        "x": 2984,
+        "y": 415,
+        "w": 130,
+        "h": 20,
+        "moving": true,
+        "ax": 2984,
+        "bx": 3154,
+        "sp": 0.9,
+        "dir": 1
+      },
+      {
+        "x": 3196,
+        "y": 380,
+        "w": 160,
+        "h": 20
+      },
+      {
+        "x": 3438,
+        "y": 345,
+        "w": 160,
+        "h": 20
+      },
+      {
+        "x": 3680,
+        "y": 380,
+        "w": 160,
+        "h": 20
+      },
+      {
+        "x": 3922,
+        "y": 415,
+        "w": 130,
+        "h": 20,
+        "moving": true,
+        "ax": 3922,
+        "bx": 4092,
+        "sp": 0.9,
+        "dir": 1
+      },
+      {
+        "x": 4134,
+        "y": 380,
+        "w": 160,
+        "h": 20
+      },
+      {
+        "x": 4376,
+        "y": 350,
+        "w": 220,
+        "h": 200
+      }
     ],
-    checkpoints:[ // {plat: platform index, dx: offset from that platform's left edge}
-      {plat:0, dx:40},
-      {plat:4, dx:70},
-      {plat:8, dx:90},
-      {plat:10, dx:90}
+    "checkpoints": [
+      {
+        "plat": 0,
+        "dx": 40
+      },
+      {
+        "plat": 5,
+        "dx": 67
+      },
+      {
+        "plat": 11,
+        "dx": 67
+      },
+      {
+        "plat": 17,
+        "dx": 67
+      }
     ],
-    coins:[
-      [150,410],[250,410],
-      [500,360],[580,360],
-      [730,290],[810,290],
-      [980,370],[1080,370],
-      [1230,300],[1320,300],
-      [1490,380],[1590,380],
-      [1780,310],
-      [2300,390],[2390,390],
-      [2840,400],[2930,400],
-      [3090,330],[3170,330]
+    "coins": [
+      [
+        462,
+        340
+      ],
+      [
+        704,
+        305
+      ],
+      [
+        1173,
+        375
+      ],
+      [
+        1400,
+        340
+      ],
+      [
+        1642,
+        305
+      ],
+      [
+        1884,
+        340
+      ],
+      [
+        2111,
+        375
+      ],
+      [
+        2580,
+        305
+      ],
+      [
+        2822,
+        340
+      ],
+      [
+        3049,
+        375
+      ],
+      [
+        3276,
+        340
+      ],
+      [
+        3518,
+        305
+      ],
+      [
+        3987,
+        375
+      ],
+      [
+        4214,
+        340
+      ]
     ],
-    hearts:[
-      [1275,295],
-      [2360,385]
+    "hearts": [
+      [
+        1642,
+        290
+      ],
+      [
+        2822,
+        325
+      ]
     ],
-    enemies:[
-      {x:500,y:378,w:28,h:24,v:1,min:470,max:600,type:0},
-      {x:980,y:388,w:28,h:24,v:-1,min:940,max:1100,type:1},
-      {x:1490,y:398,w:28,h:24,v:1,min:1440,max:1630,type:0},
-      {x:2260,y:408,w:28,h:24,v:-1,min:2260,max:2430,type:1},
-      {x:2800,y:418,w:28,h:24,v:1,min:2800,max:2970,type:0}
+    "enemies": [
+      {
+        "x": 448,
+        "y": 356,
+        "w": 28,
+        "h": 24,
+        "v": 1,
+        "min": 404,
+        "max": 492,
+        "type": 0
+      },
+      {
+        "x": 1870,
+        "y": 356,
+        "w": 28,
+        "h": 24,
+        "v": -1,
+        "min": 1826,
+        "max": 1914,
+        "type": 1
+      },
+      {
+        "x": 3262,
+        "y": 356,
+        "w": 28,
+        "h": 24,
+        "v": 1,
+        "min": 3218,
+        "max": 3306,
+        "type": 0
+      }
     ],
-    spikes:[
-
-      {x:1820,y:336,w:60,h:14}   // on platform 6 — no enemy here
+    "spikes": [
+      {
+        "x": 888,
+        "y": 366,
+        "w": 116,
+        "h": 14
+      },
+      {
+        "x": 3702,
+        "y": 366,
+        "w": 116,
+        "h": 14
+      }
     ],
-    saws:[
-      {x:770,y:312,r:16,min:710,max:830,v:1.2} // patrols platform 2 — no enemy here
+    "saws": [
+      {
+        "x": 2338,
+        "y": 362,
+        "r": 16,
+        "min": 2296,
+        "max": 2380,
+        "v": 1.3
+      }
     ],
-    portal:{x:3130,y:260,w:60,h:100}
+    "portal": {
+      "x": 4456,
+      "y": 250,
+      "w": 60,
+      "h": 100
+    }
   },
-  { // ---- STAGE 2: Starlit Ridge ----
-    name:"Starlit Ridge",
-    world:3500,
-    theme:{
-      sky:["#0c1240","#1f2d6b","#3a4f8f","#6a86c9"],
-      orb:"moon", orbPos:[770,110],
-      farMt:"#232a52", nearMt:"#2c3866", nearMtBase:"#20294d",
-      decor:"crystal", decorColor:"#33417a", tuftColor:"#a9cfff",
-      ambient:"#8fe9ff"
+  {
+    "name": "Starlit Ridge",
+    "world": 4716,
+    "theme": {
+      "sky": [
+        "#0c1240",
+        "#1f2d6b",
+        "#3a4f8f",
+        "#6a86c9"
+      ],
+      "orb": "moon",
+      "orbPos": [
+        770,
+        110
+      ],
+      "farMt": "#232a52",
+      "nearMt": "#2c3866",
+      "nearMtBase": "#20294d",
+      "decor": "crystal",
+      "decorColor": "#33417a",
+      "tuftColor": "#a9cfff",
+      "ambient": "#8fe9ff"
     },
-    platforms:[
-      {x:0,y:470,w:300,h:70},                                                   //0 start ground
-      {x:360,y:400,w:140,h:20},                                                 //1
-      {x:560,y:340,w:120,h:18, moving:true, ay:340, by:260, sp:0.8, dir:1, vertical:true}, //2 moving (shorter travel so it's always reachable)
-      {x:760,y:400,w:150,h:20},                                                 //3
-      {x:980,y:330,w:130,h:18},                                                 //4
-      {x:1180,y:430,w:160,h:20, moving:true, ax:1180, bx:1400, sp:1.0, dir:1},   //5 moving
-      {x:1480,y:350,w:140,h:18},                                                //6
-      {x:1700,y:260,w:120,h:18},                                                //7
-      {x:1900,y:400,w:170,h:20},                                                //8
-      {x:2150,y:340,w:130,h:18, moving:true, ay:340, by:250, sp:0.7, dir:-1, vertical:true}, //9 moving (shorter travel so it's always reachable)
-      {x:2350,y:440,w:200,h:20},                                                //10
-      {x:2620,y:360,w:150,h:18},                                                //11
-      {x:2850,y:430,w:180,h:20, moving:true, ax:2850, bx:3050, sp:1.1, dir:1},   //12 moving
-      {x:3150,y:350,w:220,h:200}                                                //13 final block (portal stands here)
+    "platforms": [
+      {
+        "x": 0,
+        "y": 470,
+        "w": 300,
+        "h": 70
+      },
+      {
+        "x": 382,
+        "y": 340,
+        "w": 160,
+        "h": 20
+      },
+      {
+        "x": 624,
+        "y": 375,
+        "w": 130,
+        "h": 20,
+        "moving": true,
+        "ax": 624,
+        "bx": 794,
+        "sp": 0.9,
+        "dir": 1
+      },
+      {
+        "x": 836,
+        "y": 410,
+        "w": 160,
+        "h": 20
+      },
+      {
+        "x": 1078,
+        "y": 375,
+        "w": 160,
+        "h": 20
+      },
+      {
+        "x": 1320,
+        "y": 340,
+        "w": 160,
+        "h": 20
+      },
+      {
+        "x": 1562,
+        "y": 375,
+        "w": 130,
+        "h": 20,
+        "moving": true,
+        "ax": 1562,
+        "bx": 1732,
+        "sp": 0.9,
+        "dir": 1
+      },
+      {
+        "x": 1774,
+        "y": 410,
+        "w": 160,
+        "h": 20
+      },
+      {
+        "x": 2016,
+        "y": 375,
+        "w": 160,
+        "h": 20
+      },
+      {
+        "x": 2258,
+        "y": 340,
+        "w": 160,
+        "h": 20
+      },
+      {
+        "x": 2500,
+        "y": 375,
+        "w": 130,
+        "h": 20,
+        "moving": true,
+        "ay": 375,
+        "by": 295,
+        "sp": 0.75,
+        "dir": 1,
+        "vertical": true
+      },
+      {
+        "x": 2712,
+        "y": 410,
+        "w": 160,
+        "h": 20
+      },
+      {
+        "x": 2954,
+        "y": 375,
+        "w": 160,
+        "h": 20
+      },
+      {
+        "x": 3196,
+        "y": 340,
+        "w": 160,
+        "h": 20
+      },
+      {
+        "x": 3438,
+        "y": 375,
+        "w": 130,
+        "h": 20,
+        "moving": true,
+        "ax": 3438,
+        "bx": 3608,
+        "sp": 0.9,
+        "dir": 1
+      },
+      {
+        "x": 3650,
+        "y": 410,
+        "w": 160,
+        "h": 20
+      },
+      {
+        "x": 3892,
+        "y": 375,
+        "w": 160,
+        "h": 20
+      },
+      {
+        "x": 4134,
+        "y": 340,
+        "w": 160,
+        "h": 20
+      },
+      {
+        "x": 4376,
+        "y": 350,
+        "w": 220,
+        "h": 200
+      }
     ],
-    checkpoints:[
-      {plat:0, dx:40},
-      {plat:3, dx:60},
-      {plat:8, dx:80},
-      {plat:11, dx:55}
+    "checkpoints": [
+      {
+        "plat": 0,
+        "dx": 40
+      },
+      {
+        "plat": 3,
+        "dx": 67
+      },
+      {
+        "plat": 11,
+        "dx": 67
+      },
+      {
+        "plat": 17,
+        "dx": 67
+      }
     ],
-    coins:[
-      [140,410],[220,410],
-      [400,360],
-      [800,360],[860,360],
-      [1010,290],
-      [1520,310],[1590,310],
-      [1730,220],
-      [1940,360],[2020,360],
-      [2390,400],[2470,400],
-      [2650,320],
-      [3190,310],[3260,310],[3330,310]
+    "coins": [
+      [
+        462,
+        300
+      ],
+      [
+        689,
+        335
+      ],
+      [
+        916,
+        370
+      ],
+      [
+        1158,
+        335
+      ],
+      [
+        1627,
+        335
+      ],
+      [
+        1854,
+        370
+      ],
+      [
+        2096,
+        335
+      ],
+      [
+        2565,
+        335
+      ],
+      [
+        2792,
+        370
+      ],
+      [
+        3034,
+        335
+      ],
+      [
+        3276,
+        300
+      ],
+      [
+        3503,
+        335
+      ],
+      [
+        3972,
+        335
+      ],
+      [
+        4214,
+        300
+      ]
     ],
-    hearts:[
-      [1045,285],
-      [2450,395]
+    "hearts": [
+      [
+        2096,
+        320
+      ],
+      [
+        3034,
+        320
+      ]
     ],
-    enemies:[
-      {x:400,y:378,w:28,h:24,v:1,min:360,max:490,type:0},
-      {x:800,y:378,w:28,h:24,v:-1,min:760,max:900,type:1},
-      {x:1520,y:328,w:28,h:24,v:1,min:1480,max:1610,type:0},
-      {x:1940,y:378,w:28,h:24,v:-1,min:1900,max:2060,type:1},
-      {x:2390,y:418,w:28,h:24,v:1,min:2350,max:2540,type:0},
-      {x:2650,y:338,w:28,h:24,v:-1,min:2620,max:2760,type:1}
+    "enemies": [
+      {
+        "x": 448,
+        "y": 316,
+        "w": 28,
+        "h": 24,
+        "v": 1,
+        "min": 404,
+        "max": 492,
+        "type": 1
+      },
+      {
+        "x": 1840,
+        "y": 386,
+        "w": 28,
+        "h": 24,
+        "v": -1,
+        "min": 1796,
+        "max": 1884,
+        "type": 0
+      },
+      {
+        "x": 3262,
+        "y": 316,
+        "w": 28,
+        "h": 24,
+        "v": 1,
+        "min": 3218,
+        "max": 3306,
+        "type": 1
+      }
     ],
-    spikes:[
-      {x:1015,y:316,w:70,h:14},  // on platform 4 — no enemy here
-      {x:1740,y:246,w:60,h:14}   // on platform 7 — no enemy here
+    "spikes": [
+      {
+        "x": 2280,
+        "y": 326,
+        "w": 116,
+        "h": 14
+      }
     ],
-    saws:[
-      {x:210,y:452,r:16,min:150,max:255,v:1.2} // patrols the start platform, well clear of spawn — no enemy here
+    "saws": [
+      {
+        "x": 1400,
+        "y": 322,
+        "r": 16,
+        "min": 1358,
+        "max": 1442,
+        "v": 1.3
+      },
+      {
+        "x": 3730,
+        "y": 392,
+        "r": 16,
+        "min": 3688,
+        "max": 3772,
+        "v": 1.3
+      }
     ],
-    portal:{x:3300,y:250,w:60,h:100}
+    "portal": {
+      "x": 4456,
+      "y": 250,
+      "w": 60,
+      "h": 100
+    }
   },
-  { // ---- STAGE 3: Ember Depths ----
-    name:"Ember Depths",
-    world:3560,
-    theme:{
-      sky:["#160705","#3d130f","#7a2f18","#c9541f"],
-      orb:"none", orbPos:[0,0],
-      farMt:"#3a1410", nearMt:"#521c12", nearMtBase:"#2e0f0a",
-      decor:"crystal", decorColor:"#4a1c10", tuftColor:"#ff9a4d",
-      ambient:"#ff9a4d"
+  {
+    "name": "Ember Depths",
+    "world": 5200,
+    "theme": {
+      "sky": [
+        "#160705",
+        "#3d130f",
+        "#7a2f18",
+        "#c9541f"
+      ],
+      "orb": "none",
+      "orbPos": [
+        0,
+        0
+      ],
+      "farMt": "#3a1410",
+      "nearMt": "#521c12",
+      "nearMtBase": "#2e0f0a",
+      "decor": "crystal",
+      "decorColor": "#4a1c10",
+      "tuftColor": "#ff9a4d",
+      "ambient": "#ff9a4d"
     },
-    platforms:[
-      {x:0,y:470,w:300,h:70},                                                   //0 start ground
-      {x:340,y:410,w:150,h:20},                                                 //1
-      {x:560,y:460,w:130,h:20},                                                 //2
-      {x:760,y:380,w:150,h:18},                                                 //3
-      {x:980,y:460,w:170,h:20},                                                 //4
-      {x:1220,y:360,w:140,h:18, moving:true, ax:1220, bx:1400, sp:1.0, dir:1},   //5 moving
-      {x:1500,y:430,w:180,h:20},                                                //6
-      {x:1760,y:340,w:130,h:18},                                                //7
-      {x:1980,y:420,w:200,h:20},                                                //8
-      {x:2260,y:340,w:130,h:18, moving:true, ay:340, by:250, sp:0.75, dir:1, vertical:true}, //9 moving
-      {x:2470,y:440,w:200,h:20},                                                //10
-      {x:2740,y:360,w:160,h:18},                                                //11
-      {x:2980,y:430,w:190,h:20, moving:true, ax:2980, bx:3180, sp:1.0, dir:1},   //12 moving
-      {x:3260,y:350,w:220,h:200}                                                //13 final block (portal stands here)
+    "platforms": [
+      {
+        "x": 0,
+        "y": 470,
+        "w": 300,
+        "h": 70
+      },
+      {
+        "x": 382,
+        "y": 380,
+        "w": 160,
+        "h": 20
+      },
+      {
+        "x": 624,
+        "y": 415,
+        "w": 160,
+        "h": 20
+      },
+      {
+        "x": 866,
+        "y": 380,
+        "w": 160,
+        "h": 20
+      },
+      {
+        "x": 1108,
+        "y": 345,
+        "w": 130,
+        "h": 20,
+        "moving": true,
+        "ax": 1108,
+        "bx": 1278,
+        "sp": 0.9,
+        "dir": 1
+      },
+      {
+        "x": 1320,
+        "y": 380,
+        "w": 160,
+        "h": 20
+      },
+      {
+        "x": 1562,
+        "y": 415,
+        "w": 160,
+        "h": 20
+      },
+      {
+        "x": 1804,
+        "y": 380,
+        "w": 160,
+        "h": 20
+      },
+      {
+        "x": 2046,
+        "y": 345,
+        "w": 130,
+        "h": 20,
+        "moving": true,
+        "ax": 2046,
+        "bx": 2216,
+        "sp": 0.9,
+        "dir": 1
+      },
+      {
+        "x": 2258,
+        "y": 380,
+        "w": 160,
+        "h": 20
+      },
+      {
+        "x": 2500,
+        "y": 415,
+        "w": 160,
+        "h": 20
+      },
+      {
+        "x": 2742,
+        "y": 380,
+        "w": 160,
+        "h": 20
+      },
+      {
+        "x": 2984,
+        "y": 345,
+        "w": 130,
+        "h": 20,
+        "moving": true,
+        "ay": 345,
+        "by": 265,
+        "sp": 0.75,
+        "dir": 1,
+        "vertical": true
+      },
+      {
+        "x": 3196,
+        "y": 380,
+        "w": 160,
+        "h": 20
+      },
+      {
+        "x": 3438,
+        "y": 415,
+        "w": 130,
+        "h": 20,
+        "moving": true,
+        "ax": 3438,
+        "bx": 3608,
+        "sp": 0.9,
+        "dir": 1
+      },
+      {
+        "x": 3650,
+        "y": 380,
+        "w": 160,
+        "h": 20
+      },
+      {
+        "x": 3892,
+        "y": 345,
+        "w": 160,
+        "h": 20
+      },
+      {
+        "x": 4134,
+        "y": 380,
+        "w": 160,
+        "h": 20
+      },
+      {
+        "x": 4376,
+        "y": 415,
+        "w": 160,
+        "h": 20
+      },
+      {
+        "x": 4618,
+        "y": 380,
+        "w": 160,
+        "h": 20
+      },
+      {
+        "x": 4860,
+        "y": 350,
+        "w": 220,
+        "h": 200
+      }
     ],
-    checkpoints:[
-      {plat:0, dx:40},
-      {plat:4, dx:80},
-      {plat:8, dx:90},
-      {plat:11, dx:70}
+    "checkpoints": [
+      {
+        "plat": 0,
+        "dx": 40
+      },
+      {
+        "plat": 5,
+        "dx": 67
+      },
+      {
+        "plat": 13,
+        "dx": 67
+      },
+      {
+        "plat": 19,
+        "dx": 67
+      }
     ],
-    coins:[
-      [150,410],[250,410],
-      [410,360],
-      [620,410],
-      [820,330],
-      [1030,410],[1110,410],
-      [1560,380],[1630,380],
-      [1810,290],
-      [2040,370],[2120,370],
-      [2540,390],[2610,390],
-      [2800,310],[2870,310],
-      [3330,300],[3400,300]
+    "coins": [
+      [
+        704,
+        375
+      ],
+      [
+        946,
+        340
+      ],
+      [
+        1173,
+        305
+      ],
+      [
+        1400,
+        340
+      ],
+      [
+        1642,
+        375
+      ],
+      [
+        2111,
+        305
+      ],
+      [
+        2338,
+        340
+      ],
+      [
+        2580,
+        375
+      ],
+      [
+        3049,
+        305
+      ],
+      [
+        3276,
+        340
+      ],
+      [
+        3503,
+        375
+      ],
+      [
+        3730,
+        340
+      ],
+      [
+        3972,
+        305
+      ],
+      [
+        4456,
+        375
+      ],
+      [
+        4698,
+        340
+      ]
     ],
-    hearts:[
-      [1290,310],
-      [2320,300]
+    "hearts": [
+      [
+        1642,
+        360
+      ],
+      [
+        3972,
+        290
+      ]
     ],
-    enemies:[
-      {x:620,y:428,w:28,h:24,v:1,min:580,max:670,type:0},
-      {x:1030,y:428,w:28,h:24,v:-1,min:1000,max:1130,type:1},
-      {x:1560,y:398,w:28,h:24,v:1,min:1500,max:1660,type:0},
-      {x:2040,y:388,w:28,h:24,v:-1,min:2000,max:2160,type:1},
-      {x:2540,y:408,w:28,h:24,v:1,min:2470,max:2640,type:0},
-      {x:2800,y:328,w:28,h:24,v:-1,min:2740,max:2870,type:1}
+    "enemies": [
+      {
+        "x": 932,
+        "y": 356,
+        "w": 28,
+        "h": 24,
+        "v": 1,
+        "min": 888,
+        "max": 976,
+        "type": 0
+      },
+      {
+        "x": 2324,
+        "y": 356,
+        "w": 28,
+        "h": 24,
+        "v": -1,
+        "min": 2280,
+        "max": 2368,
+        "type": 1
+      },
+      {
+        "x": 3716,
+        "y": 356,
+        "w": 28,
+        "h": 24,
+        "v": 1,
+        "min": 3672,
+        "max": 3760,
+        "type": 0
+      }
     ],
-    spikes:[
-      {x:400,y:396,w:60,h:14},   // on platform 1 — no enemy here
-      {x:1800,y:326,w:70,h:14}   // on platform 7 — no enemy here
+    "spikes": [
+      {
+        "x": 404,
+        "y": 366,
+        "w": 116,
+        "h": 14
+      },
+      {
+        "x": 2764,
+        "y": 366,
+        "w": 116,
+        "h": 14
+      }
     ],
-    saws:[
-      {x:800,y:362,r:16,min:780,max:880,v:1.4},   // patrols platform 3 — no enemy here
-      {x:230,y:452,r:16,min:180,max:280,v:1.2}    // patrols the start platform, well clear of spawn — no enemy here
+    "saws": [
+      {
+        "x": 1884,
+        "y": 362,
+        "r": 16,
+        "min": 1842,
+        "max": 1926,
+        "v": 1.3
+      },
+      {
+        "x": 4214,
+        "y": 362,
+        "r": 16,
+        "min": 4172,
+        "max": 4256,
+        "v": 1.3
+      }
     ],
-    portal:{x:3340,y:250,w:60,h:100}
+    "portal": {
+      "x": 4940,
+      "y": 250,
+      "w": 60,
+      "h": 100
+    }
+  },
+  {
+    "name": "Frostpeak Climb",
+    "world": 5170,
+    "theme": {
+      "sky": [
+        "#050b1a",
+        "#12213f",
+        "#274670",
+        "#6f9dc9"
+      ],
+      "orb": "moon",
+      "orbPos": [
+        200,
+        100
+      ],
+      "farMt": "#1b2c4d",
+      "nearMt": "#26436b",
+      "nearMtBase": "#152239",
+      "decor": "crystal",
+      "decorColor": "#3a5a86",
+      "tuftColor": "#d8f0ff",
+      "ambient": "#bfe9ff"
+    },
+    "platforms": [
+      {
+        "x": 0,
+        "y": 470,
+        "w": 300,
+        "h": 70
+      },
+      {
+        "x": 382,
+        "y": 344,
+        "w": 160,
+        "h": 20
+      },
+      {
+        "x": 624,
+        "y": 344,
+        "w": 130,
+        "h": 20,
+        "moving": true,
+        "ax": 624,
+        "bx": 794,
+        "sp": 0.9,
+        "dir": 1
+      },
+      {
+        "x": 836,
+        "y": 397,
+        "w": 160,
+        "h": 20
+      },
+      {
+        "x": 1078,
+        "y": 397,
+        "w": 160,
+        "h": 20
+      },
+      {
+        "x": 1320,
+        "y": 344,
+        "w": 160,
+        "h": 20
+      },
+      {
+        "x": 1562,
+        "y": 344,
+        "w": 130,
+        "h": 20,
+        "moving": true,
+        "ay": 344,
+        "by": 264,
+        "sp": 0.75,
+        "dir": 1,
+        "vertical": true
+      },
+      {
+        "x": 1774,
+        "y": 397,
+        "w": 160,
+        "h": 20
+      },
+      {
+        "x": 2016,
+        "y": 397,
+        "w": 160,
+        "h": 20
+      },
+      {
+        "x": 2258,
+        "y": 344,
+        "w": 160,
+        "h": 20
+      },
+      {
+        "x": 2500,
+        "y": 344,
+        "w": 130,
+        "h": 20,
+        "moving": true,
+        "ax": 2500,
+        "bx": 2670,
+        "sp": 0.9,
+        "dir": 1
+      },
+      {
+        "x": 2712,
+        "y": 397,
+        "w": 160,
+        "h": 20
+      },
+      {
+        "x": 2954,
+        "y": 397,
+        "w": 160,
+        "h": 20
+      },
+      {
+        "x": 3196,
+        "y": 344,
+        "w": 160,
+        "h": 20
+      },
+      {
+        "x": 3438,
+        "y": 344,
+        "w": 130,
+        "h": 20,
+        "moving": true,
+        "ax": 3438,
+        "bx": 3608,
+        "sp": 0.9,
+        "dir": 1
+      },
+      {
+        "x": 3650,
+        "y": 397,
+        "w": 160,
+        "h": 20
+      },
+      {
+        "x": 3892,
+        "y": 397,
+        "w": 130,
+        "h": 20,
+        "moving": true,
+        "ay": 397,
+        "by": 317,
+        "sp": 0.75,
+        "dir": 1,
+        "vertical": true
+      },
+      {
+        "x": 4104,
+        "y": 344,
+        "w": 160,
+        "h": 20
+      },
+      {
+        "x": 4346,
+        "y": 344,
+        "w": 160,
+        "h": 20
+      },
+      {
+        "x": 4588,
+        "y": 397,
+        "w": 160,
+        "h": 20
+      },
+      {
+        "x": 4830,
+        "y": 350,
+        "w": 220,
+        "h": 200
+      }
+    ],
+    "checkpoints": [
+      {
+        "plat": 0,
+        "dx": 40
+      },
+      {
+        "plat": 5,
+        "dx": 67
+      },
+      {
+        "plat": 11,
+        "dx": 67
+      },
+      {
+        "plat": 19,
+        "dx": 67
+      }
+    ],
+    "coins": [
+      [
+        462,
+        304
+      ],
+      [
+        689,
+        304
+      ],
+      [
+        1158,
+        357
+      ],
+      [
+        1400,
+        304
+      ],
+      [
+        1627,
+        304
+      ],
+      [
+        2096,
+        357
+      ],
+      [
+        2338,
+        304
+      ],
+      [
+        2565,
+        304
+      ],
+      [
+        2792,
+        357
+      ],
+      [
+        3034,
+        357
+      ],
+      [
+        3503,
+        304
+      ],
+      [
+        3730,
+        357
+      ],
+      [
+        3957,
+        357
+      ],
+      [
+        4426,
+        304
+      ],
+      [
+        4668,
+        357
+      ]
+    ],
+    "hearts": [
+      [
+        2096,
+        342
+      ],
+      [
+        3034,
+        342
+      ]
+    ],
+    "enemies": [
+      {
+        "x": 448,
+        "y": 320,
+        "w": 28,
+        "h": 24,
+        "v": 1,
+        "min": 404,
+        "max": 492,
+        "type": 1
+      },
+      {
+        "x": 2324,
+        "y": 320,
+        "w": 28,
+        "h": 24,
+        "v": -1,
+        "min": 2280,
+        "max": 2368,
+        "type": 0
+      },
+      {
+        "x": 3716,
+        "y": 373,
+        "w": 28,
+        "h": 24,
+        "v": 1,
+        "min": 3672,
+        "max": 3760,
+        "type": 1
+      }
+    ],
+    "spikes": [
+      {
+        "x": 858,
+        "y": 383,
+        "w": 116,
+        "h": 14
+      },
+      {
+        "x": 3218,
+        "y": 330,
+        "w": 116,
+        "h": 14
+      }
+    ],
+    "saws": [
+      {
+        "x": 1854,
+        "y": 379,
+        "r": 16,
+        "min": 1812,
+        "max": 1896,
+        "v": 1.3
+      },
+      {
+        "x": 4184,
+        "y": 326,
+        "r": 16,
+        "min": 4142,
+        "max": 4226,
+        "v": 1.3
+      }
+    ],
+    "portal": {
+      "x": 4910,
+      "y": 250,
+      "w": 60,
+      "h": 100
+    }
+  },
+  {
+    "name": "Skyforge Summit",
+    "world": 5624,
+    "theme": {
+      "sky": [
+        "#2a0a3d",
+        "#5b1f5e",
+        "#a13f5c",
+        "#e8834f"
+      ],
+      "orb": "sun",
+      "orbPos": [
+        820,
+        100
+      ],
+      "farMt": "#4a2050",
+      "nearMt": "#6e2f4a",
+      "nearMtBase": "#3a1533",
+      "decor": "crystal",
+      "decorColor": "#5a2a4f",
+      "tuftColor": "#ffd0e8",
+      "ambient": "#ffb0d9"
+    },
+    "platforms": [
+      {
+        "x": 0,
+        "y": 470,
+        "w": 300,
+        "h": 70
+      },
+      {
+        "x": 382,
+        "y": 348,
+        "w": 160,
+        "h": 20
+      },
+      {
+        "x": 624,
+        "y": 401,
+        "w": 160,
+        "h": 20
+      },
+      {
+        "x": 866,
+        "y": 401,
+        "w": 160,
+        "h": 20
+      },
+      {
+        "x": 1108,
+        "y": 348,
+        "w": 130,
+        "h": 20,
+        "moving": true,
+        "ax": 1108,
+        "bx": 1278,
+        "sp": 0.9,
+        "dir": 1
+      },
+      {
+        "x": 1320,
+        "y": 348,
+        "w": 160,
+        "h": 20
+      },
+      {
+        "x": 1562,
+        "y": 401,
+        "w": 160,
+        "h": 20
+      },
+      {
+        "x": 1804,
+        "y": 401,
+        "w": 160,
+        "h": 20
+      },
+      {
+        "x": 2046,
+        "y": 348,
+        "w": 130,
+        "h": 20,
+        "moving": true,
+        "ay": 348,
+        "by": 268,
+        "sp": 0.75,
+        "dir": 1,
+        "vertical": true
+      },
+      {
+        "x": 2258,
+        "y": 348,
+        "w": 160,
+        "h": 20
+      },
+      {
+        "x": 2500,
+        "y": 401,
+        "w": 130,
+        "h": 20,
+        "moving": true,
+        "ax": 2500,
+        "bx": 2670,
+        "sp": 0.9,
+        "dir": 1
+      },
+      {
+        "x": 2712,
+        "y": 401,
+        "w": 160,
+        "h": 20
+      },
+      {
+        "x": 2954,
+        "y": 348,
+        "w": 160,
+        "h": 20
+      },
+      {
+        "x": 3196,
+        "y": 348,
+        "w": 160,
+        "h": 20
+      },
+      {
+        "x": 3438,
+        "y": 401,
+        "w": 130,
+        "h": 20,
+        "moving": true,
+        "ay": 401,
+        "by": 321,
+        "sp": 0.75,
+        "dir": 1,
+        "vertical": true
+      },
+      {
+        "x": 3650,
+        "y": 401,
+        "w": 160,
+        "h": 20
+      },
+      {
+        "x": 3892,
+        "y": 348,
+        "w": 130,
+        "h": 20,
+        "moving": true,
+        "ax": 3892,
+        "bx": 4062,
+        "sp": 0.9,
+        "dir": 1
+      },
+      {
+        "x": 4104,
+        "y": 348,
+        "w": 160,
+        "h": 20
+      },
+      {
+        "x": 4346,
+        "y": 401,
+        "w": 160,
+        "h": 20
+      },
+      {
+        "x": 4588,
+        "y": 401,
+        "w": 160,
+        "h": 20
+      },
+      {
+        "x": 4830,
+        "y": 348,
+        "w": 130,
+        "h": 20,
+        "moving": true,
+        "ax": 4830,
+        "bx": 5000,
+        "sp": 0.9,
+        "dir": 1
+      },
+      {
+        "x": 5042,
+        "y": 348,
+        "w": 160,
+        "h": 20
+      },
+      {
+        "x": 5284,
+        "y": 350,
+        "w": 220,
+        "h": 200
+      }
+    ],
+    "checkpoints": [
+      {
+        "plat": 0,
+        "dx": 40
+      },
+      {
+        "plat": 7,
+        "dx": 67
+      },
+      {
+        "plat": 15,
+        "dx": 67
+      },
+      {
+        "plat": 21,
+        "dx": 67
+      }
+    ],
+    "coins": [
+      [
+        704,
+        361
+      ],
+      [
+        946,
+        361
+      ],
+      [
+        1173,
+        308
+      ],
+      [
+        1642,
+        361
+      ],
+      [
+        1884,
+        361
+      ],
+      [
+        2111,
+        308
+      ],
+      [
+        2338,
+        308
+      ],
+      [
+        2565,
+        361
+      ],
+      [
+        3034,
+        308
+      ],
+      [
+        3503,
+        361
+      ],
+      [
+        3730,
+        361
+      ],
+      [
+        3957,
+        308
+      ],
+      [
+        4184,
+        308
+      ],
+      [
+        4426,
+        361
+      ],
+      [
+        4895,
+        308
+      ],
+      [
+        5122,
+        308
+      ]
+    ],
+    "hearts": [
+      [
+        1884,
+        346
+      ],
+      [
+        3730,
+        346
+      ]
+    ],
+    "enemies": [
+      {
+        "x": 932,
+        "y": 377,
+        "w": 28,
+        "h": 24,
+        "v": 1,
+        "min": 888,
+        "max": 976,
+        "type": 0
+      },
+      {
+        "x": 2324,
+        "y": 324,
+        "w": 28,
+        "h": 24,
+        "v": -1,
+        "min": 2280,
+        "max": 2368,
+        "type": 1
+      },
+      {
+        "x": 4170,
+        "y": 324,
+        "w": 28,
+        "h": 24,
+        "v": 1,
+        "min": 4126,
+        "max": 4214,
+        "type": 0
+      }
+    ],
+    "spikes": [
+      {
+        "x": 1342,
+        "y": 334,
+        "w": 116,
+        "h": 14
+      },
+      {
+        "x": 3218,
+        "y": 334,
+        "w": 116,
+        "h": 14
+      }
+    ],
+    "saws": [
+      {
+        "x": 462,
+        "y": 330,
+        "r": 16,
+        "min": 420,
+        "max": 504,
+        "v": 1.3
+      },
+      {
+        "x": 2792,
+        "y": 383,
+        "r": 16,
+        "min": 2750,
+        "max": 2834,
+        "v": 1.3
+      },
+      {
+        "x": 4668,
+        "y": 383,
+        "r": 16,
+        "min": 4626,
+        "max": 4710,
+        "v": 1.3
+      }
+    ],
+    "portal": {
+      "x": 5364,
+      "y": 250,
+      "w": 60,
+      "h": 100
+    }
   }
 ];
 
@@ -470,21 +1937,6 @@ function loadStage(n){
   enemies=lvl.enemies.map(e=>({...e}));
   spikes=lvl.spikes.map(s=>({...s}));
   saws=lvl.saws.map(s=>({...s, ang:Math.random()*6.28}));
-
-  // Stage 2 & 3: keep checkpoint areas completely safe.
-  // Hazards remain elsewhere, but nothing can spawn directly on/near a checkpoint.
-  if(n>=2){
-    const safeRadius=115;
-    const cps=lvl.checkpoints.map(cp=>{
-      const plat=platforms[cp.plat];
-      return {x:plat.x+cp.dx, y:plat.y-38};
-    });
-    const nearCP=x=>cps.some(cp=>Math.abs(x-cp.x)<safeRadius);
-
-    enemies=enemies.filter(e=>!nearCP(e.x+e.w/2));
-    spikes=spikes.filter(s=>!nearCP(s.x+s.w/2));
-    saws=saws.filter(s=>!nearCP(s.x));
-  }
   portal={...lvl.portal,t:0};
   particles=[];
   shakeT=0;
@@ -501,6 +1953,7 @@ function loadStage(n){
   activeCP=checkpoints[0];
 
   p={x:activeCP.x,y:activeCP.y,w:26,h:38,vx:0,vy:0,ground:false,inv:0,
+     maxSpeed:5.2,dashTimer:0,
      jumps:0,maxJumps:2,coyote:0,jumpBuf:0,facing:1,squash:1,anim:0,running:false,dust:0};
   camera=0;
   hud();
@@ -607,7 +2060,8 @@ function update(dt){
   if(L){p.vx-=.75;p.facing=-1;p.running=true;}
   if(R){p.vx+=.75;p.facing=1;p.running=true;}
   if(!L&&!R)p.vx*=.82;
-  p.vx=Math.max(-5.2,Math.min(5.2,p.vx));
+  if(p.dashTimer>0){ p.dashTimer--; if(p.dashTimer<=0)p.maxSpeed=5.2; }
+  p.vx=Math.max(-p.maxSpeed,Math.min(p.maxSpeed,p.vx));
 
   if(p.ground)p.coyote=8; else p.coyote=Math.max(0,p.coyote-1);
   if(J)p.jumpBuf=8; else p.jumpBuf=Math.max(0,p.jumpBuf-1);
@@ -615,6 +2069,8 @@ function update(dt){
   if(p.jumpBuf>0 && (p.coyote>0 || p.jumps<p.maxJumps)){
     if(p.coyote>0){ p.vy=-12.5; p.jumps=1; snd.jump(); }
     else if(p.jumps<p.maxJumps){ p.vy=-11; p.jumps++; snd.doubleJump();
+      p.maxSpeed=8.4; p.dashTimer=26; // 2nd jump gets a speed burst so it covers real distance
+      p.vx=Math.max(-p.maxSpeed,Math.min(p.maxSpeed,p.vx+p.facing*2.6));
       spawnParticles(p.x+p.w/2,p.y+p.h,6,["#4be8d6","#cdfff8"],2,18,2);
     }
     p.ground=false;p.coyote=0;p.jumpBuf=0;p.squash=1.3;
@@ -639,7 +2095,7 @@ function update(dt){
   }
   p.x=Math.max(0,Math.min(world-p.w,p.x));
 
-  if(!wasGround&&p.ground){ p.squash=0.7; spawnParticles(p.x+p.w/2,p.y+p.h,5,["#e8d9b8","#c9b28a"],2,14,2); }
+  if(!wasGround&&p.ground){ p.squash=0.7; p.maxSpeed=5.2; p.dashTimer=0; spawnParticles(p.x+p.w/2,p.y+p.h,5,["#e8d9b8","#c9b28a"],2,14,2); }
 
   if(p.y>650)hurt();
 
@@ -1012,11 +2468,22 @@ function draw(){
   ctx.restore();
 }
 
+const STEP=1000/60; // fixed physics timestep (ms) — keeps speed identical on every screen,
+                     // regardless of monitor/phone refresh rate (60/90/120/144Hz all behave the same)
+let acc=0;
 function loop(t){
-  let dt=Math.min(32,t-last||16);last=t;
-  bgTime+=dt;
-  if(ambient)updateAmbient(dt);
-  update(dt);
+  if(!last)last=t;
+  let frameDt=t-last; last=t;
+  if(frameDt>250)frameDt=250; // clamp big pauses (tab switch, lag spike) so we don't spiral
+  bgTime+=frameDt;
+  acc+=frameDt;
+  let steps=0;
+  while(acc>=STEP && steps<8){
+    if(ambient)updateAmbient(STEP);
+    update(STEP);
+    acc-=STEP;
+    steps++;
+  }
   draw();
   requestAnimationFrame(loop);
 }
